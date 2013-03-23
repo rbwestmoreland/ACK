@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Http;
+﻿using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
@@ -13,17 +9,19 @@ namespace Ack.Web
     {
         public static void Initialize()
         {
-            WebApiConfig(GlobalConfiguration.Configuration);
-            MvcConfig();
+            WebApiInitialize(GlobalConfiguration.Configuration);
+            MvcInitialize();
         }
 
-        public static void WebApiConfig(HttpConfiguration config)
+        public static void WebApiInitialize(HttpConfiguration config)
         {
+            IoCConfig.RegisterWebApi(config);
             RouteConfig.RegisterWebApiRoutes(config);
         }
 
-        public static void MvcConfig()
+        public static void MvcInitialize()
         {
+            IoCConfig.RegisterMvc(ControllerBuilder.Current, GlobalFilters.Filters);
             //AreaRegistration.RegisterAllAreas();
             BundleConfig.RegisterBundles(BundleTable.Bundles);
             RouteConfig.RegisterMvcRoutes(RouteTable.Routes);
