@@ -15,6 +15,7 @@ namespace Ack.Web
 
         public static void WebApiInitialize(HttpConfiguration config)
         {
+            WebApiFormattersConfig.Configure(config);
             IoCConfig.RegisterWebApi(config);
             RouteConfig.RegisterWebApiRoutes(config);
         }
