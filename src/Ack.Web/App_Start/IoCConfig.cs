@@ -42,7 +42,8 @@ namespace Ack.Web
         public static void RegisterWebApi(HttpConfiguration config)
         {
             //controllers
-            Container.Register<ValuesController>().AsMultiInstance();
+            Container.Register<ErrorsController>().AsMultiInstance();
+            Container.Register<EventsController>().AsMultiInstance();
 
             //filters
             var filters = Container.ResolveAll<IFilter>();

@@ -121,13 +121,17 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\IoCConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\WebApiFormattersConfig.cs" />
     <Compile Include="Controllers\Mvc\ControllerFactories\TinyIoCControllerFactory.cs" />
     <Compile Include="Controllers\Mvc\HomeController.cs" />
+    <Compile Include="Controllers\WebApi\BaseApiController.cs" />
+    <Compile Include="Controllers\WebApi\ErrorsController.cs" />
     <Compile Include="Controllers\WebApi\DependencyResolvers\TinyIoCDependencyResolver.cs" />
-    <Compile Include="Controllers\WebApi\ValuesController.cs" />
+    <Compile Include="Controllers\WebApi\EventsController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\WebApi\Errors\Error.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -148,7 +152,7 @@
   <ItemGroup>
     <Folder Include="App_Data\" />
     <Folder Include="Content\" />
-    <Folder Include="Models\" />
+    <Folder Include="Models\Mvc\" />
     <Folder Include="Scripts\" />
   </ItemGroup>
   <ItemGroup>
