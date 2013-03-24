@@ -12,7 +12,10 @@ namespace Ack.Web
             config.Formatters.Clear();
             config.Formatters.Add(new JsonMediaTypeFormatter
             {
-                SerializerSettings = new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() }
+                SerializerSettings = new JsonSerializerSettings 
+                { 
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                }
             });
         }
     }
