@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Ack.Worker.QueueWorkers;
+using System.Threading;
 
 namespace Ack.Worker
 {
@@ -10,6 +7,13 @@ namespace Ack.Worker
     {
         static void Main(string[] args)
         {
+            var queueWorker = IoCConfig.Container.Resolve<IQueueWorker>();
+
+            while (true)
+            {
+                queueWorker.ProcessNextMessage();
+                Thread.Sleep(1000);
+            }
         }
     }
 }
