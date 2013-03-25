@@ -5,7 +5,7 @@ namespace Ack.Infrastructure.Queues
     public interface IQueue
     {
         Task Push(string data);
-        Task<IMessage> Peek();
-        Task Pop(IMessage message);
+        Task<IQueueMessage> Peek();
+        Task Pop(IQueueMessage queueMessage);
     }
 }

@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
-namespace Ack.Infrastructure.Queues
+namespace Ack.Infrastructure.Queues.IronIo
 {
     public class IronIoQueue : IQueue
     {
@@ -84,9 +84,9 @@ namespace Ack.Infrastructure.Queues
             var responseObj = JsonConvert.DeserializeObject<IronIoPushResponse>(responseContent);
         }
 
-        public async Task<IMessage> Peek()
+        public async Task<IQueueMessage> Peek()
         {
-            var message = default(IMessage);
+            var message = default(IQueueMessage);
 
             var request = new HttpRequestMessage(HttpMethod.Get, "messages/peek");
 
@@ -98,7 +98,7 @@ namespace Ack.Infrastructure.Queues
                 responseObj.Messages.Any())
             {
                 var ironIoMessage = responseObj.Messages.First();
-                message = new Message
+                message = new QueueMessage
                 {
                     Id = ironIoMessage.Id,
                     Data = ironIoMessage.Body
@@ -108,9 +108,9 @@ namespace Ack.Infrastructure.Queues
             return message;
         }
 
-        public async Task Pop(IMessage message)
+        public async Task Pop(IQueueMessage queueMessage)
         {
-            var request = new HttpRequestMessage(HttpMethod.Delete, string.Format("messages/{0}", message.Id));
+            var request = new HttpRequestMessage(HttpMethod.Delete, string.Format("messages/{0}", queueMessage.Id));
 
             var response = await HttpClient.SendAsync(request);
             var responseContent = await response.Content.ReadAsStringAsync();

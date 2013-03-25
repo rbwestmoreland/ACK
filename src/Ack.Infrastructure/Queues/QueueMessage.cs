@@ -2,7 +2,7 @@
 
 namespace Ack.Infrastructure.Queues
 {
-    public class Message : IMessage
+    internal class QueueMessage : IQueueMessage
     {
         public string Id { get; set; }
         public string Data { get; set; }
