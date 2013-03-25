@@ -1,4 +1,6 @@
-﻿using Ack.Web.Controllers.Mvc;
+﻿using Ack.Infrastructure.Queues;
+using Ack.Infrastructure.Queues.IronIo;
+using Ack.Web.Controllers.Mvc;
 using Ack.Web.Controllers.Mvc.ControllerFactories;
 using Ack.Web.Controllers.WebApi;
 using Ack.Web.Controllers.WebApi.DependencyResolvers;
@@ -21,6 +23,12 @@ namespace Ack.Web
 
         private static void RegisterCommon()
         {
+            var ironIoToken = "";
+            var ironIoProjectId = "";
+            var ironIoQueueName = "";
+            var ironIoQueueUrl = "https://mq-aws-us-east-1.iron.io";
+
+            Container.Register<IQueue>((c, n) => new IronIoQueue(ironIoToken, ironIoProjectId, ironIoQueueName, ironIoQueueUrl));
         }
 
         public static void RegisterMvc(ControllerBuilder controllerBuilder, GlobalFilterCollection globalFilters)
