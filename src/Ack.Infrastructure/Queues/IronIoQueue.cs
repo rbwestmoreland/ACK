@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Newtonsoft.Json;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace Ack.Infrastructure.Queues
 {
@@ -50,7 +47,7 @@ namespace Ack.Infrastructure.Queues
                 throw new ArgumentException("invalid", "projectId");
             }
 
-            if (!Uri.TryCreate(queueUri, string.Format("/1/projects/{0}/queues/{1}/messages", projectId, queueName), out queueUri))
+            if (!Uri.TryCreate(queueUri, string.Format("/1/projects/{0}/queues/{1}/", projectId, queueName), out queueUri))
             {
                 throw new ArgumentException("invalid", "queueName");
             }
@@ -63,16 +60,13 @@ namespace Ack.Infrastructure.Queues
 
         public async Task Push(string data)
         {
-            var bytes = Encoding.UTF8.GetBytes(data);
-            var body = Convert.ToBase64String(bytes);
-
             var requestObj = new
             {
                 messages = new [] 
                 {
                     new
                     {
-                        body = body
+                        body = data
                     }
                 }
             };
@@ -80,30 +74,69 @@ namespace Ack.Infrastructure.Queues
             var requestJson = JsonConvert.SerializeObject(requestObj);
             var requestContent = new StringContent(requestJson);
             requestContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            var request = new HttpRequestMessage(HttpMethod.Post, string.Empty)
+            var request = new HttpRequestMessage(HttpMethod.Post, "messages")
             {
                 Content = requestContent
             };
 
             var response = await HttpClient.SendAsync(request);
             var responseContent = await response.Content.ReadAsStringAsync();
-            var responseStatusCode = response.StatusCode;
-            var responseObj = JsonConvert.DeserializeObject<PushResponse>(responseContent);
+            var responseObj = JsonConvert.DeserializeObject<IronIoPushResponse>(responseContent);
         }
 
         public async Task<IMessage> Peek()
         {
-            throw new NotImplementedException();
+            var message = default(IMessage);
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "messages/peek");
+
+            var response = await HttpClient.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var responseObj = JsonConvert.DeserializeObject<IronIoPeekResponse>(responseContent);
+
+            if (responseObj.Messages != null &&
+                responseObj.Messages.Any())
+            {
+                var ironIoMessage = responseObj.Messages.First();
+                message = new Message
+                {
+                    Id = ironIoMessage.Id,
+                    Data = ironIoMessage.Body
+                };
+            }
+
+            return message;
         }
 
         public async Task Pop(IMessage message)
         {
-            throw new NotImplementedException();
+            var request = new HttpRequestMessage(HttpMethod.Delete, string.Format("messages/{0}", message.Id));
+
+            var response = await HttpClient.SendAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var responseObj = JsonConvert.DeserializeObject<IronIoPopResponse>(responseContent);
         }
 
-        private class PushResponse
+        private class IronIoPushResponse
         {
             public string[] Ids { get; set; }
+            public string Msg { get; set; }
+        }
+
+        private class IronIoMessage
+        {
+            public string Id { get; set; }
+            public string Body { get; set; }
+            public int Timeout { get; set; }
+        }
+
+        private class IronIoPeekResponse
+        {
+            public IronIoMessage[] Messages { get; set; }
+        }
+
+        private class IronIoPopResponse
+        {
             public string Msg { get; set; }
         }
     }
