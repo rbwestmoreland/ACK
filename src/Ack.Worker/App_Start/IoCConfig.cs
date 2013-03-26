@@ -3,6 +3,7 @@ using Ack.Infrastructure.Loggers;
 using Ack.Infrastructure.Loggers.Console;
 using Ack.Infrastructure.Queues;
 using Ack.Infrastructure.Queues.IronIo;
+using Ack.Infrastructure.Queues.Msmq;
 using Ack.Worker.EventHandlers;
 using Ack.Worker.QueueWorkers;
 using Ack.Worker.QueueWorkers.Events;
@@ -27,7 +28,8 @@ namespace Ack.Worker
             var ironIoQueueName = "";
             var ironIoQueueUrl = "https://mq-aws-us-east-1.iron.io";
 
-            Container.Register<IQueue>((c, n) => new IronIoQueue(ironIoToken, ironIoProjectId, ironIoQueueName, ironIoQueueUrl));
+            //Container.Register<IQueue>((c, n) => new IronIoQueue(ironIoToken, ironIoProjectId, ironIoQueueName, ironIoQueueUrl));
+            Container.Register<IQueue>((c, n) => new MsmqQueue(@".\private$\testqueue"));
 
             Container.Register<IEventHandler, CatchAllEventHandler>("CatchAllEventHandler");
             Container.Register<IEventHandler, ExampleEventHandler>("ExampleEventHandler");

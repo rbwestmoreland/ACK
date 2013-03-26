@@ -1,5 +1,6 @@
 ﻿using Ack.Infrastructure.Queues;
 using Ack.Infrastructure.Queues.IronIo;
+using Ack.Infrastructure.Queues.Msmq;
 using Ack.Web.Controllers.Mvc;
 using Ack.Web.Controllers.Mvc.ControllerFactories;
 using Ack.Web.Controllers.WebApi;
@@ -28,7 +29,8 @@ namespace Ack.Web
             var ironIoQueueName = "";
             var ironIoQueueUrl = "https://mq-aws-us-east-1.iron.io";
 
-            Container.Register<IQueue>((c, n) => new IronIoQueue(ironIoToken, ironIoProjectId, ironIoQueueName, ironIoQueueUrl));
+            //Container.Register<IQueue>((c, n) => new IronIoQueue(ironIoToken, ironIoProjectId, ironIoQueueName, ironIoQueueUrl));
+            Container.Register<IQueue>((c, n) => new MsmqQueue(@".\private$\testqueue"));
         }
 
         public static void RegisterMvc(ControllerBuilder controllerBuilder, GlobalFilterCollection globalFilters)
