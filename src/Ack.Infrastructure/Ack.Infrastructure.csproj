@@ -35,6 +35,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="RabbitMQ.Client">
+      <HintPath>..\packages\RabbitMQ.Client.3.0.4\lib\net30\RabbitMQ.Client.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
@@ -57,6 +60,7 @@
     <Compile Include="Loggers\AggregateLogger.cs" />
     <Compile Include="Loggers\ILogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Queues\Amqp\AmqpQueue.cs" />
     <Compile Include="Queues\Msmq\MsmqQueue.cs" />
     <Compile Include="Queues\QueueMessage.cs" />
     <Compile Include="Queues\IQueueMessage.cs" />

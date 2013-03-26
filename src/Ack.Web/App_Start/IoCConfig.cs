@@ -1,4 +1,5 @@
 ﻿using Ack.Infrastructure.Queues;
+using Ack.Infrastructure.Queues.Amqp;
 using Ack.Infrastructure.Queues.IronIo;
 using Ack.Infrastructure.Queues.Msmq;
 using Ack.Web.Controllers.Mvc;
@@ -24,13 +25,21 @@ namespace Ack.Web
 
         private static void RegisterCommon()
         {
-            var ironIoToken = "";
-            var ironIoProjectId = "";
-            var ironIoQueueName = "";
-            var ironIoQueueUrl = "https://mq-aws-us-east-1.iron.io";
-
+            //var ironIoToken = "";
+            //var ironIoProjectId = "";
+            //var ironIoQueueName = "";
+            //var ironIoQueueUrl = "https://mq-aws-us-east-1.iron.io";
             //Container.Register<IQueue>((c, n) => new IronIoQueue(ironIoToken, ironIoProjectId, ironIoQueueName, ironIoQueueUrl));
-            Container.Register<IQueue>((c, n) => new MsmqQueue(@".\private$\testqueue"));
+
+            //var queueName = "";
+            //Container.Register<IQueue>((c, n) => new MsmqQueue(queueName));
+
+            var hostName = "";
+            var username = "";
+            var password = "";
+            var virtualHost = "";
+            var port = 0;
+            Container.Register<IQueue>((c, n) => new AmqpQueue(hostName, username, password, virtualHost, port));
         }
 
         public static void RegisterMvc(ControllerBuilder controllerBuilder, GlobalFilterCollection globalFilters)
