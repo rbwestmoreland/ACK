@@ -8,7 +8,12 @@ namespace Ack.Infrastructure.Queues.Amqp
     public class AmqpQueue : IQueue
     {
         private const string QueueName = "ack";
-        private ConnectionFactory ConnectionFactory { get; set; }
+        private string HostName { get; set; }
+        private string Username { get; set; }
+        private string Password { get; set; }
+        private string VirtualHost { get; set; }
+        private int Port { get; set; }
+        private IModel Channel { get; set; }
 
         public AmqpQueue(string hostName,
             string username,
@@ -16,25 +21,41 @@ namespace Ack.Infrastructure.Queues.Amqp
             string virtualHost,
             int port)
         {
-            ConnectionFactory = new ConnectionFactory();
-            ConnectionFactory.HostName = hostName;
-            ConnectionFactory.UserName = username;
-            ConnectionFactory.Password = password;
-            ConnectionFactory.VirtualHost = virtualHost;
-            ConnectionFactory.Port = port;
+            HostName = hostName;
+            Username = username;
+            Password = password;
+            VirtualHost = virtualHost;
+            Port = port;
+
+            Initialize();
         }
-        
+
+        private void Initialize()
+        {
+            var connectionFactory = new ConnectionFactory
+                {
+                    HostName = HostName,
+                    UserName = Username,
+                    Password = Password,
+                    VirtualHost = VirtualHost,
+                    Port = Port
+                };
+            //start persistent connection
+            var connection = connectionFactory.CreateConnection();
+            //create channel
+            Channel = connection.CreateModel();
+            //create queue
+            Channel.QueueDeclare(QueueName, true, false, false, null);
+        }
+
         public Task Push(string data)
         {
             return Task.Factory.StartNew(() =>
                 {
-                    using(var connection = ConnectionFactory.CreateConnection())
-                    using(var channel = connection.CreateModel())
-                    {
-                        channel.QueueDeclare(QueueName, true, false, false, null);
-                        var body = Encoding.UTF8.GetBytes(data);
-                        channel.BasicPublish(string.Empty, QueueName, null, body);
-                    }
+                    //encode data
+                    var body = Encoding.UTF8.GetBytes(data);
+                    //enqueue message
+                    Channel.BasicPublish(string.Empty, QueueName, null, body);
                 });
         }
 
@@ -44,29 +65,29 @@ namespace Ack.Infrastructure.Queues.Amqp
             {
                 var message = default(IQueueMessage);
 
-                using (var connection = ConnectionFactory.CreateConnection())
-                using (var channel = connection.CreateModel())
+                //create queue consumer
+                var consumer = new QueueingBasicConsumer(Channel);
+                //start queue consumer with acknowledgment
+                Channel.BasicConsume(QueueName, false, consumer);
+
+                //dequeue message (not removed until acknowledged)
+                object result;
+                consumer.Queue.Dequeue(500, out result);
+
+                //null check
+                var eventArgs = result as BasicDeliverEventArgs;
+                if (eventArgs != null)
                 {
-                    channel.QueueDeclare(QueueName, true, false, false, null);
-                    var consumer = new QueueingBasicConsumer(channel);
-                    channel.BasicConsume(QueueName, false, consumer);
-
-                    object result;
-                    consumer.Queue.Dequeue(500, out result);
-
-                    var eventArgs = result as BasicDeliverEventArgs;
-                    if (eventArgs != null)
+                    //decode data
+                    var body = Encoding.UTF8.GetString(eventArgs.Body);
+                    message = new QueueMessage
                     {
-                        var body = System.Text.Encoding.UTF8.GetString(eventArgs.Body);
-                        message = new QueueMessage
-                        {
-                            Id = eventArgs.DeliveryTag.ToString(),
-                            Data = body
-                        };
-                    }
-
-                    return message;
+                        Id = eventArgs.DeliveryTag.ToString(),
+                        Data = body
+                    };
                 }
+
+                return message;
             });
         }
 
@@ -74,18 +95,11 @@ namespace Ack.Infrastructure.Queues.Amqp
         {
             return Task.Factory.StartNew(() =>
             {
-                using (var connection = ConnectionFactory.CreateConnection())
-                using (var channel = connection.CreateModel())
+                //acknowledgment message (remove from queue)
+                ulong id;
+                if (ulong.TryParse(queueMessage.Id, out id))
                 {
-                    channel.QueueDeclare(QueueName, true, false, false, null);
-                    var consumer = new QueueingBasicConsumer(channel);
-                    channel.BasicConsume(QueueName, false, consumer);
-
-                    ulong id;
-                    if (ulong.TryParse(queueMessage.Id, out id))
-                    {
-                        channel.BasicAck(id, false);
-                    }
+                    Channel.BasicAck(id, false);
                 }
             });
         }
